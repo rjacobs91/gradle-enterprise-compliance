@@ -27,7 +27,13 @@ changes here and all implementing repos get the benefit.
 
 ## How to add to your project
 
-1. Add the following to your project's `settings.gradle` file **on the first line**
+1. Upgrade your gradle wrapper version to at least 7.3
+
+```shell
+gradle wrapper --gradle-version 7.X
+```
+
+2. Add the following to your project's `settings.gradle` file **on the first line**
 
 ```groovy
 pluginManagement {
@@ -66,8 +72,16 @@ complianceSpotBugsCheck {
 ```
 
 9. Remove `id 'com.github.jk1.dependency-license-report' version 'X.X'` plugin and config, if present
-10. Remove `id 'jacoco'` plugin and config, if present
-11. Remove `id 'com.kageiit.jacobo' version 'X.X.X'` plugin and config, if present
+10. Apply the following if you need to override the default groups for which to ignore license checks
+
+```groovy
+complianceLicenseCheck {
+    additionalExcludedGroups = ['com.mycompany', 'maven.group.id']
+}
+```
+
+11. Remove `id 'jacoco'` plugin and config, if present
+12. Remove `id 'com.kageiit.jacobo' version 'X.X.X'` plugin and config, if present
 13. Apply the following if you need to override the default Jacoco rule of 90% line coverage across your module
 
 ```groovy
