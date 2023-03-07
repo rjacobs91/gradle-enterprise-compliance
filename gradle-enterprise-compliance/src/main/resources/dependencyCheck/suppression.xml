@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+    <!-- Add common suppressions here -->
+    <!-- Below is an example suppression for Spring which is unlikely to be ever fixed
+    <suppress until="2050-06-03">
+        <notes>
+            Vulnerability that's unlikely to be fixed. Affects the entire Spring framework (boot, web, webflux) up until
+            Spring 6.
+            Useful links:
+            - https://nvd.nist.gov/vuln/detail/CVE-2016-1000027
+            - https://github.com/spring-projects/spring-framework/issues/24434
+            - https://github.com/spring-projects/spring-framework/issues/24434#issuecomment-579669626
+            - https://github.com/spring-projects/spring-framework/issues/24434#issuecomment-744348934
+            - https://github.com/spring-projects/spring-framework/issues/24434#issuecomment-1132621725
+        </notes>
+        <packageUrl regex="true">^pkg:maven/org\.springframework/spring.*$</packageUrl>
+        <cve>CVE-2016-1000027</cve>
+    </suppress>
+    -->
+</suppressions>
