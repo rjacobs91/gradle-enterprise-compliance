@@ -1,0 +1,13 @@
+<FindBugsFilter>
+    <!-- Ignore returning references to internal representations of objects -->
+    <!-- Mutability is key to performance and functionality of many repositories -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP"/>
+    </Match>
+
+    <!-- Ignoring when internal representation stores reference to external representation -->
+    <!-- Mutability is key to performance and functionality of many repositories -->
+    <Match>
+        <Bug pattern="EI_EXPOSE_REP2"/>
+    </Match>
+</FindBugsFilter>

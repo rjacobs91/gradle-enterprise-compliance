@@ -1,0 +1,157 @@
+plugins {
+    id 'java-gradle-plugin'
+    id 'groovy'
+    id 'com.gradle.plugin-publish' version '1.1.+'
+
+    // Code coverage plugins
+    id 'jacoco'
+    id 'com.kageiit.jacobo' version '2.1.+'
+    id 'org.barfuin.gradle.jacocolog' version '2.0.+'
+}
+
+group = 'com.github.compliance'
+project.version = '1.0.0-SNAPSHOT'
+
+// Only supporting back as far as Java 8
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+java {
+    withSourcesJar()
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral {
+        content {
+            // We want to exclude this project's packages.
+            excludeGroupByRegex "com\\.github\\.compliance.*"
+        }
+    }
+    maven {
+        // Maven plugin repository
+        url "https://plugins.gradle.org/m2"
+        content {
+            // We want to exclude this project's packages.
+            excludeGroupByRegex "com\\.github\\.compliance.*"
+        }
+    }
+}
+
+configurations {
+    suppressions.extendsFrom implementation
+}
+
+// We want to lock our dependencies on build because we are importing highest patch versions by default
+dependencyLocking {
+    lockAllConfigurations()
+    lockMode = LockMode.STRICT
+}
+
+task resolveAndLockAll {
+    doFirst {
+        assert gradle.startParameter.writeDependencyLocks
+    }
+    doLast {
+        configurations.findAll {
+            it.canBeResolved
+        }.each { it.resolve() }
+    }
+}
+
+jacoco {
+    toolVersion = "0.8.7"
+}
+// Generate a HTML report as well as XML. If we ever integrate with SonarQube it wants XML output
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        csv.enabled false
+        html.enabled true
+    }
+}
+// Enforces as part of the build specific coverage requirements
+jacocoTestCoverageVerification {
+    violationRules {
+        rule {
+            element = 'CLASS'
+            limit {
+                counter = 'LINE'
+                value = 'COVEREDRATIO'
+                minimum = 0.9
+            }
+            // It is acceptable to ignore some classes which will be tested in the functional test suite
+            // e.g. custom task closures
+            excludes = ['**.**_closure*']
+        }
+    }
+}
+
+// To convert our jacoco test coverage report
+// Required by Gitlab in order to visualize coverage in an MR
+import com.kageiit.jacobo.JacoboTask
+
+task jacobo(type: JacoboTask) {
+    jacocoReport = file("build/reports/jacoco/test/jacocoTestReport.xml")
+    coberturaReport = file("build/reports/cobertura/cobertura.xml")
+    srcDirs = sourceSets.main.groovy.srcDirs
+    dependsOn(jacocoTestReport)
+}
+
+dependencies {
+    // https://mvnrepository.com/artifact/org.spockframework/spock-core
+    testImplementation group: 'org.spockframework', name: 'spock-core', version: '2.0-groovy-3.0'
+
+    // External plugins we want to configure
+    implementation group: 'org.owasp', name: 'dependency-check-gradle', version: '7.4.+'
+    implementation group: 'com.github.spotbugs.snom', name: 'spotbugs-gradle-plugin', version: '4.7.+'
+    implementation group: 'com.github.jk1', name: 'gradle-license-report', version: '1.+'
+    implementation group: 'com.kageiit.jacobo', name: 'com.kageiit.jacobo.gradle.plugin', version: '2.1.+'
+    implementation group: 'org.barfuin.gradle.jacocolog', name: 'org.barfuin.gradle.jacocolog.gradle.plugin', version: '2.0.+'
+
+    // Required until upgrade of dependency checker
+    implementation group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.13.2'
+}
+
+// Add a source set for the functional test suite
+sourceSets {
+    functionalTest {
+        resources {
+            srcDir 'src/main/resources'
+        }
+    }
+}
+
+gradlePlugin {
+    // Define the plugin
+    plugins {
+        gradleComplianceCheck {
+            id = 'gradle.compliance.check'
+            displayName = 'Gradle Complaince Plugin'
+            description = 'A gradle plugin which performs typical compliance checks against your gradle module'
+            tags.set(['scanning', 'vulnerability', 'compliance', 'licensing'])
+            implementationClass = 'com.github.compliance.check.EnterpriseCompliancePlugin'
+        }
+    }
+    testSourceSets(sourceSets.functionalTest)
+}
+
+configurations.functionalTestImplementation.extendsFrom(configurations.testImplementation)
+
+// Add a task to run the functional tests
+tasks.register('functionalTest', Test) {
+    testClassesDirs = sourceSets.functionalTest.output.classesDirs
+    classpath = sourceSets.functionalTest.runtimeClasspath
+    useJUnitPlatform()
+}
+
+check {
+    dependsOn(functionalTest)
+    dependsOn(jacocoTestCoverageVerification)
+    dependsOn(jacobo)
+}
+
+test {
+    useJUnitPlatform()
+    finalizedBy(jacocoTestReport)
+}
