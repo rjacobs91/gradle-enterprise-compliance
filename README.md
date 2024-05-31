@@ -27,10 +27,10 @@ changes here and all implementing repos get the benefit.
 
 ## How to add to your project
 
-1. Upgrade your gradle wrapper version to at least 7.3
+1. Upgrade your gradle wrapper version to at least 8.5
 
 ```shell
-gradle wrapper --gradle-version 7.X
+gradle wrapper --gradle-version 8.X
 ```
 
 2. Add the following to your project's `settings.gradle` file **on the first line**

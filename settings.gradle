@@ -1,5 +1,3 @@
 rootProject.name = 'gradle-enterprise-compliance'
 
 include('gradle-enterprise-compliance')
-
-enableFeaturePreview('ONE_LOCKFILE_PER_PROJECT')

@@ -62,9 +62,9 @@ class EnterpriseCompliancePlugin implements Plugin<Project> {
     private static final String EXCLUSION_RESOURCE = 'spotBugs/exclusion.xml'
 
     // Version constants
-    private static final String CHECKSTYLE_VERSION = '8.44'
-    private static final String SPOTBUGS_VERSION = '4.7.3'
-    private static final String JACOCO_VERSION = '0.8.8'
+    private static final String CHECKSTYLE_VERSION = '10.12.7'
+    private static final String SPOTBUGS_VERSION = '4.8.3'
+    private static final String JACOCO_VERSION = '0.8.10'
 
     void apply(Project project) {
         def complianceVulnerabilityCheck = initialiseVulnerabilityCheckConfiguration(project)
@@ -156,10 +156,10 @@ class EnterpriseCompliancePlugin implements Plugin<Project> {
             def defaultSuppressionFile = "$project.buildDir/config/dependencyCheck/defaultSuppression.xml".toString()
             dependencyCheck.failBuildOnCVSS = complianceVulnerabilityCheck.failBuildOnCVSS
             dependencyCheck.suppressionFiles = [defaultSuppressionFile] + complianceVulnerabilityCheck.additionalSuppressionFiles
+            dependencyCheck.analyzers.ossIndex.enabled = complianceVulnerabilityCheck.enableOssIndexAnalyzer;
 
             if (!complianceVulnerabilityCheck.useDefaultVulnerabilityDatabase) {
-                dependencyCheck.cve.urlModified = complianceVulnerabilityCheck.modifiedCveFeed
-                dependencyCheck.cve.urlBase = complianceVulnerabilityCheck.baseCveFeed
+                dependencyCheck.nvd.datafeedUrl = complianceVulnerabilityCheck.modifiedNvdFeed
             }
         }
 
@@ -199,9 +199,9 @@ class EnterpriseCompliancePlugin implements Plugin<Project> {
 
         project.tasks.withType(JacocoReport.class).forEach(task -> {
             task.reports {
-                xml.enabled true
-                csv.enabled false
-                html.enabled true
+                xml.required = true
+                csv.required = false
+                html.required = true
             }
         })
 

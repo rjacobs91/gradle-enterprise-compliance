@@ -9,7 +9,6 @@ import com.github.compliance.check.extension.JacocoCheckExtension
 import com.github.compliance.check.extension.SpotBugsCheckExtension
 import com.github.compliance.check.extension.VulnerabilityCheckExtension
 
-import java.lang.reflect.Field
 import java.math.RoundingMode
 
 class EnterpriseCompliancePluginTest extends Specification {
@@ -157,8 +156,7 @@ class EnterpriseCompliancePluginTest extends Specification {
 
         then:
         (project.extensions.findByName("dependencyCheck")["suppressionFiles"] as ArrayList).size() == 2
-        project.extensions.findByName("dependencyCheck")["cve"]["urlModified"] == null
-        project.extensions.findByName("dependencyCheck")["cve"]["urlBase"] == null
+        project.extensions.findByName("dependencyCheck")["nvd"]["datafeedUrl"] == null
     }
 
     def "plugin uses local dependency check files"() {
@@ -168,14 +166,12 @@ class EnterpriseCompliancePluginTest extends Specification {
         when:
         project.plugins.apply("gradle.compliance.check")
         project.extensions.getByType(VulnerabilityCheckExtension.class).useDefaultVulnerabilityDatabase = false
-        project.extensions.getByType(VulnerabilityCheckExtension.class).modifiedCveFeed = 'file:///owasp/data/nvdcve-1.1-modified.json.gz'
-        project.extensions.getByType(VulnerabilityCheckExtension.class).baseCveFeed = 'file:///owasp/data/nvdcve-1.1-%d.json.gz'
+        project.extensions.getByType(VulnerabilityCheckExtension.class).modifiedNvdFeed = 'https://nvd-cve.somedomain.com'
 
         project.getTasksByName('complianceCheckRun', false) // forces a project evaluation
 
         then:
-        project.extensions.findByName("dependencyCheck")["cve"]["urlModified"] == 'file:///owasp/data/nvdcve-1.1-modified.json.gz'
-        project.extensions.findByName("dependencyCheck")["cve"]["urlBase"] == 'file:///owasp/data/nvdcve-1.1-%d.json.gz'
+        project.extensions.findByName("dependencyCheck")["nvd"]["datafeedUrl"] == 'https://nvd-cve.somedomain.com'
     }
 
     def "plugin applies license check exclusions"() {

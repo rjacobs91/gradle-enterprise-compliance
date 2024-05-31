@@ -6,17 +6,16 @@ plugins {
     // Code coverage plugins
     id 'jacoco'
     id 'com.kageiit.jacobo' version '2.1.+'
-    id 'org.barfuin.gradle.jacocolog' version '2.0.+'
+    id 'org.barfuin.gradle.jacocolog' version '3.1.+'
 }
 
 group = 'com.github.compliance'
 project.version = '1.0.0-SNAPSHOT'
 
-// Only supporting back as far as Java 8
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
-
 java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
     withSourcesJar()
 }
 
@@ -48,7 +47,7 @@ dependencyLocking {
     lockMode = LockMode.STRICT
 }
 
-task resolveAndLockAll {
+tasks.register('resolveAndLockAll') {
     doFirst {
         assert gradle.startParameter.writeDependencyLocks
     }
@@ -60,14 +59,14 @@ task resolveAndLockAll {
 }
 
 jacoco {
-    toolVersion = "0.8.7"
+    toolVersion = "0.8.10"
 }
 // Generate a HTML report as well as XML. If we ever integrate with SonarQube it wants XML output
 jacocoTestReport {
     reports {
-        xml.enabled true
-        csv.enabled false
-        html.enabled true
+        xml.required = true
+        csv.required = false
+        html.required = true
     }
 }
 // Enforces as part of the build specific coverage requirements
@@ -103,14 +102,11 @@ dependencies {
     testImplementation group: 'org.spockframework', name: 'spock-core', version: '2.0-groovy-3.0'
 
     // External plugins we want to configure
-    implementation group: 'org.owasp', name: 'dependency-check-gradle', version: '7.4.+'
-    implementation group: 'com.github.spotbugs.snom', name: 'spotbugs-gradle-plugin', version: '4.7.+'
+    implementation group: 'org.owasp', name: 'dependency-check-gradle', version: '9.0.+'
+    implementation group: 'com.github.spotbugs.snom', name: 'spotbugs-gradle-plugin', version: '4.8.+'
     implementation group: 'com.github.jk1', name: 'gradle-license-report', version: '1.+'
     implementation group: 'com.kageiit.jacobo', name: 'com.kageiit.jacobo.gradle.plugin', version: '2.1.+'
-    implementation group: 'org.barfuin.gradle.jacocolog', name: 'org.barfuin.gradle.jacocolog.gradle.plugin', version: '2.0.+'
-
-    // Required until upgrade of dependency checker
-    implementation group: 'com.fasterxml.jackson', name: 'jackson-bom', version: '2.13.2'
+    implementation group: 'org.barfuin.gradle.jacocolog', name: 'org.barfuin.gradle.jacocolog.gradle.plugin', version: '3.1.+'
 }
 
 // Add a source set for the functional test suite
