@@ -285,6 +285,7 @@ class EnterpriseCompliancePlugin implements Plugin<Project> {
         def permissiveLicenses = "$licenseCheckFolder/permissive-licenses.json"
         def defaultExcludedGroups = [
                 // Add sensible default groups here which do not match patterns within license-normalizer-bundle.json or our extension
+                'com.github.compliance',
                 'software.amazon.codeguruprofiler', // Returns `null` as licence, but is Apache https://mvnrepository.com/artifact/software.amazon.codeguruprofiler/codeguru-profiler-java-agent
                 'org.junit', // Returns `null` as licence, but is EPL 2.0 https://mvnrepository.com/artifact/org.junit/junit-bom
                 'com.fasterxml.jackson', // Returns `null` as licence, but is Apache https://mvnrepository.com/artifact/com.fasterxml.jackson/jackson-bom
@@ -312,8 +313,9 @@ class EnterpriseCompliancePlugin implements Plugin<Project> {
         // other plugin tasks and extensions at runtime
         project.afterEvaluate {
             def licenseReport = project.extensions.findByType(LicenseReportExtension.class)
+            complianceLicenseCheck.additionalExcludedGroups.addAll(defaultExcludedGroups)
             licenseReport.filters = [new LicenseBundleNormalizer(licenseBundle, true)]
-            licenseReport.excludeGroups = complianceLicenseCheck.additionalExcludedGroups.addAll(defaultExcludedGroups)
+            licenseReport.excludeGroups = complianceLicenseCheck.additionalExcludedGroups
             licenseReport.allowedLicensesFile = new File(permissiveLicenses)
         }
 
