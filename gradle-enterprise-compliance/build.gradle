@@ -129,7 +129,6 @@ gradlePlugin {
             id = 'gradle.compliance.check'
             displayName = 'Gradle Complaince Plugin'
             description = 'A gradle plugin which performs typical compliance checks against your gradle module'
-            tags.set(['scanning', 'vulnerability', 'compliance', 'licensing'])
             implementationClass = 'com.github.compliance.check.EnterpriseCompliancePlugin'
         }
     }
